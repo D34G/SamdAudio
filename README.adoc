@@ -45,10 +45,11 @@ Compatible with Atmel SAMD series MCU and is best used with DAC related amplifie
         // called to manually stop the audio player
 
 == Tutorial ==
-In the Player.ino file you will see an example that covers all relevant functions and procedures related to this library.  If you are not using a Class D amplifier with the Shutdown Pin (SD) then comment out the lines of code related to 'selectShutdownPin(shutdownPin)' and 'setShutdownPinState(pinState)' to avoid unintended behavior.  A video and picture filled, fun fantastic tutorial is coming soon!  IMO, AudioZero (the library which is reffered to most often for newer Arduino's) absolutely sucks.  It's not maintained well and some pretty important bugs have not been addressed in years.  
-
+In the Player.ino file you will see an example that covers all relevant functions and procedures related to this library.  If you are not using a Class D amplifier with the Shutdown Pin (SD) then comment out the lines of code related to 'selectShutdownPin(shutdownPin)' and 'setShutdownPinState(pinState)' to avoid unintended behavior.  A video and picture filled, fun fantastic tutorial is coming soon!
 
 == Why another library? ==
+IMO, AudioZero (the library which is reffered to most often for newer Arduino's) absolutely sucks.  It's not maintained well and some pretty important bugs have not been addressed in years.
+
 I found AloyseTech's library and thought this is perfect, almost.  Sdfat (as of Ver 2.0.5) doesn't play well with the Nano 33 IoT, so I changed the SD card driver to SD.h.  I added some good controls for Class D amplifiers that are commonly used.  A few more changes to go and this library will be your go-to for wav file playback! +
 ----
 To-Do:
