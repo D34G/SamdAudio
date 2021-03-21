@@ -1,8 +1,63 @@
-= Audio Library for Arduino Zero or SAMD based boards =
+= Audio Library for Arduino Nano 33 IoT or SAMD based boards =
 
-The SamdAudio library enables an Arduino board to playback mono 8bit .wav files 
+The SamdAudio library enables an Arduino Nano 33 IoT to playback mono 8bit .wav files 
 from a storage device like an SD card, without blocking program execution.
-Compatible with Atmel SAMD serie MCU.
+Compatible with Atmel SAMD series MCU and is best used with DAC related amplifiers.
+
+== Available Functions ==
+    void selectShutdownPin(uint8_t shutdownPin);
+        // select the pin to control amplifiers that contain shutdown pins (SD)
+        
+    void setShutdownPinState(bool pinState);
+        // change the state of the shutdown pin of an amplifier
+        
+    void selectDACPin(uint8_t audioOutputPin);
+        // select the audio output pin on the microcontroller
+        
+    void begin(uint32_t sampleRate, uint8_t numOfChannels, uint16_t audio_buffer_size); 
+        // initates audio player. variables required are sample rate, number of channels to use, and audio buffer size
+        
+    void play(const char *fname, uint8_t channel);
+        // to play a single track, used when multiple channels are necessary
+        
+    void play(const char *fname);
+        // to play a single track, used when multiple channels are not necessary
+        
+    void stopChannel(uint8_t c);
+        // called to stop a specific audio channel
+        
+    void loopChannel(uint8_t c, bool loopEnable);
+        // sets a specific channel to be looped until stopped
+
+    bool isPlaying(uint8_t c);
+        // check to see if selected channel is playing
+        
+    void setGain(uint8_t v);
+        // set initial volume, default set to 4 (shouldn't need if using hardware gain control)
+        
+    void gainUp();
+        // increase volume (shouldn't need if using hardware gain control)
+        
+    void gainDown();
+        // increase volume (shouldn't need if using hardware gain control)
+
+    void end();
+        // called to manually stop the audio player
+
+== Tutorial ==
+In the Player.ino file you will see an example that covers all relevant functions and procedures related to this library.  If you are not using a Class D amplifier with the Shutdown Pin (SD) then comment out the lines of code related to 'selectShutdownPin(shutdownPin)' and 'setShutdownPinState(pinState)' to avoid unintended behavior.  A video and picture filled, fun fantastic tutorial is coming soon!  IMO, AudioZero (the library which is reffered to most often for newer Arduino's) absolutely sucks.  It's not maintained well and some pretty important bugs have not been addressed in years.  
+
+
+== Why another library? ==
+I found AloyseTech's library and thought this is perfect, almost.  Sdfat (as of Ver 2.0.5) doesn't play well with the Nano 33 IoT, so I changed the SD card driver to SD.h.  I added some good controls for Class D amplifiers that are commonly used.  A few more changes to go and this library will be your go-to for wav file playback! +
+----
+To-Do:
+  o Add control of digital potentiometer circuits for amps with electronic control of gain
+  o Make non blocking an optional feature
+  o Add stereo playback (need help with this one)
+  o Add native MP3 decoding
+  o take le nap then fire Z MISSILES!
+----
 
 == License ==
 
