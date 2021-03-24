@@ -31,6 +31,7 @@ public:
     void play(const char *fname);
     void stopChannel(uint8_t c);
     void loopChannel(uint8_t c, bool loopEnable);
+    void setBlocking(bool blockFlag);
 
     bool isPlaying(uint8_t c);
     void setGain(uint8_t v);
@@ -44,6 +45,7 @@ public:
 
     void selectShutdownPin(uint8_t shutdownPin);
     void setShutdownPinState(bool pinState);
+    void setShutdownPinState(bool pinState, bool muteAudio);
     void selectDACPin(uint8_t audioOutputPin);
 
 private:
