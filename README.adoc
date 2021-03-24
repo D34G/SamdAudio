@@ -11,8 +11,14 @@ Compatible with Atmel SAMD series MCU and is best used with DAC related amplifie
     void setShutdownPinState(bool pinState);
         // change the state of the shutdown pin of an amplifier
         
+    void setShutdownPinState(bool pinState, bool muteAudio);
+        // change the state of the shutdown pin of an amplifier while setting mute flag
+        
     void selectDACPin(uint8_t audioOutputPin);
         // select the audio output pin on the microcontroller
+        
+    setBlocking(bool blockFlag);
+        // enable or disable blocking mode to prevent code execution play() until audio track finishes, disabled by default
         
     void begin(uint32_t sampleRate, uint8_t numOfChannels, uint16_t audio_buffer_size); 
         // initates audio player. variables required are sample rate, number of channels to use, and audio buffer size
@@ -54,7 +60,6 @@ I found AloyseTech's library and thought this is perfect, almost.  Sdfat (as of 
 ----
 To-Do:
   o Add control of digital potentiometer circuits for amps with electronic control of gain
-  o Make non blocking an optional feature
   o Add stereo playback (need help with this one)
   o Add native MP3 decoding
   o take le nap then fire Z MISSILES!
