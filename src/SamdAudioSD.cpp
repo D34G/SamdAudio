@@ -464,7 +464,7 @@ void SamdAudioSD::setShutdownPinState(bool pinState) // change the state of the 
   }
 }
 
-void SamdAudioSD::setShutdownPinState(bool pinState, bool muteAudio) // change the state of the shutdown pin of an amplifier
+void SamdAudioSD::setShutdownPinState(bool pinState, bool muteAudio) // change the state of the shutdown pin of an amplifier while setting mute flag
 {
   if(pinState == HIGH)
   {
