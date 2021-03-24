@@ -43,6 +43,11 @@ uint8_t __shutdownPin = 7;  // can be any pin, used to control a Class D amplifi
 uint8_t __audioOutputPin = A0; // set to DAC output pin, used to send audio data to an amplifier circuit
 uint8_t __audioPlayerVolume = 4; // 0 to 3, software volume control (shouldn't need if using hardware gain control)
 bool __criticalSection = false; // used in audio read handler
+bool __enableBlocking = false; // prevents code execution at the end of play() until track finishes 
+bool __playingAudio = false; // indicates if audio is playing when blocking is enabled
+bool __shutdownPinState = LOW; // current state of shutdown pin
+bool __enableShutdown = false;  // indicates that an amplifier shutdown pin is being used
+bool __muteAudio = false; // override to prevent changes to SD pin during playback
 
 void TC5_Handler (void) __attribute__ ((weak, alias("AudioPlay_Handler")));
 void TC3_Handler (void) __attribute__ ((weak, alias("AudioRead_Handler")));
@@ -147,6 +152,15 @@ void SamdAudioSD::play(const char *fname, uint8_t channel) // to play a single t
 
   rampDivisor[channel]=RAMPIN;
 
+  if (__enableBlocking) // if blocking is enabled set flag for playing audio
+  {
+    __playingAudio = true;
+  }
+  else
+  {
+    __playingAudio = false;
+  }
+
   if(alonePlaying(channel)) // once the buffer is filled for the first time the counter can be started
   {
     enablePlayerTimer(); // here's where we airbend the magic smoke inside all components
@@ -154,6 +168,14 @@ void SamdAudioSD::play(const char *fname, uint8_t channel) // to play a single t
   __audioPlaying[channel]=true;
 
   enableReaderTimer(); // here's where we also airbend the magic smoke inside all components
+
+  if (__enableBlocking) // if blocking is enabled, wait here until audio completes
+  {
+    while(__playingAudio)
+    {
+      // wait
+    }
+  }
 }
 
 void SamdAudioSD::play(const char *fname) // to play a single track, used when multiple channels are not necessary
@@ -180,6 +202,15 @@ void SamdAudioSD::play(const char *fname) // to play a single track, used when m
 
   rampDivisor[0]=RAMPIN;
 
+  if (__enableBlocking) // if blocking is enabled set flag for playing audio
+  {
+    __playingAudio = true;
+  }
+  else
+  {
+    __playingAudio = false;
+  }
+
   if(alonePlaying(0)) // once the buffer is filled for the first time the counter can be started
   {
     enablePlayerTimer(); // here's where we airbend the magic smoke inside all components
@@ -187,6 +218,14 @@ void SamdAudioSD::play(const char *fname) // to play a single track, used when m
   __audioPlaying[0]=true;
 
   enableReaderTimer(); // here's where we also airbend the magic smoke inside all components
+
+  if (__enableBlocking) // if blocking is enabled, wait here until audio completes
+  {
+    while(__playingAudio)
+    {
+      // wait
+    }
+  }
 }
 
 bool SamdAudioSD::alonePlaying(uint8_t channel) // check to see if selected channel is the only one playing
@@ -408,23 +447,53 @@ void SamdAudioSD::selectShutdownPin(uint8_t shutdownPin) // select the pin to co
   __shutdownPin = shutdownPin; // defaults to pin D7 if not set here
   pinMode(__shutdownPin, OUTPUT);    // sets the shutdown pin as output
   setShutdownPinState(LOW); // start with shutdown pin off
+  __enableShutdown = true;
 }
 
 void SamdAudioSD::setShutdownPinState(bool pinState) // change the state of the shutdown pin of an amplifier
 {
   if(pinState == HIGH)
   {
-    digitalWrite(__shutdownPin, HIGH); // sets the shutdown pin on (has a pulldown resistor)
+    digitalWrite(__shutdownPin, HIGH); // sets the shutdown pin on
+  __shutdownPinState = HIGH;
   }
   if(pinState == LOW)
   {
-    digitalWrite(__shutdownPin, LOW);  // sets the shutdown pin off (has a pulldown resistor)
+    digitalWrite(__shutdownPin, LOW);  // sets the shutdown pin off
+  __shutdownPinState = LOW;
+  }
+}
+
+void SamdAudioSD::setShutdownPinState(bool pinState, bool muteAudio) // change the state of the shutdown pin of an amplifier
+{
+  if(pinState == HIGH)
+  {
+    digitalWrite(__shutdownPin, HIGH); // sets the shutdown pin on
+  __shutdownPinState = HIGH;
+  }
+  if(pinState == LOW)
+  {
+    digitalWrite(__shutdownPin, LOW);  // sets the shutdown pin off
+  __shutdownPinState = LOW;
+  }
+  if(muteAudio)
+  {
+    __muteAudio = true;
+  }
+  else
+  {
+    __muteAudio = false;
   }
 }
 
 void SamdAudioSD::selectDACPin(uint8_t audioOutputPin) // select the audio output pin on the microcontroller
 {
   __audioOutputPin = audioOutputPin; // defaults to DAC pin A0 if not set here
+}
+
+void SamdAudioSD::setBlocking(bool blockFlag) // enable or disable blocking mode to prevent code execution after play() is called until audio track finishes, disabled by default
+{
+  __enableBlocking = blockFlag; // sets the state of the global blocking flag
 }
 
 
@@ -445,7 +514,6 @@ extern "C" {
           if (__SampleIndex[index] < __audioBufferSize - 1)
           {
             __audioData+=__WavSamples[index][whichBuffer[index]][__SampleIndex[index]++]/rampDivisor[index];
-
           }
           else // last sample from buffer
           {
@@ -463,25 +531,45 @@ extern "C" {
           {
             rampDivisor[index]--;
           }
-        }
 
+          if (__enableShutdown && !__shutdownPinState && !__muteAudio)
+          {
+            digitalWrite(__shutdownPin, HIGH);  // sets the shutdown pin on
+            __shutdownPinState = HIGH;
+          }
+        }
         else if (__audioFileReady[index]) // end of file, now play ramp out
         {
-            if(__audioLooping[index][0])
+          if(__audioLooping[index][0])
+          {
+            __audioFile[index].seek(44); // if this block is hit, there is a 'snap' at the end of the wav file playback
+            __audioFile[index].read(__WavSamples[index][1-whichBuffer[index]], __audioBufferSize);
+            whichBuffer[index]=1-whichBuffer[index];
+            fillNextBuffer[index]=1;
+            __SampleIndex[index]=0;
+          }
+          else
+          {
+            __audioFile[index].close();
+            __audioFileReady[index] = false;
+            rampDivisor[index]=__WavSamples[index][whichBuffer[index]][__SampleIndex[index]]; // start ramp out from last audio sample
+            __audioData+=rampDivisor[index];
+
+            bool isLooping = false; 
+            for(uint8_t channel=0; channel<__numOfChannelsUsed; channel++) // check if any channel is looping to prevent setting SD pin low
             {
-              __audioFile[index].seek(44);
-              __audioFile[index].read(__WavSamples[index][1-whichBuffer[index]], __audioBufferSize);
-              whichBuffer[index]=1-whichBuffer[index];
-              fillNextBuffer[index]=1;
-              __SampleIndex[index]=0;
+              if(__audioLooping[channel][0])
+              {
+                isLooping = true;
+                break;
+              }
             }
-            else
+            if(__enableShutdown && __shutdownPinState && !isLooping) // set the SD pin low if all conditions are met. this is to help prevent the "pop" from the wav playback
             {
-              __audioFile[index].close();
-              __audioFileReady[index] = false;
-              rampDivisor[index]=__WavSamples[index][whichBuffer[index]][__SampleIndex[index]]; // start ramp out from last audio sample
-              __audioData+=rampDivisor[index];
+              digitalWrite(__shutdownPin, LOW);  // sets the shutdown pin off
+              __shutdownPinState = LOW;
             }
+          }
         }
         else if(rampDivisor[index]>0) // ramp out finish, end of activity on the channel
         {
@@ -501,7 +589,10 @@ extern "C" {
             {
               /* Wait for synchronization */
             }
-
+            if (__enableBlocking)
+            {
+              __playingAudio = false;
+            }
           }
         }
       }
