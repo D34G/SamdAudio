@@ -43,16 +43,14 @@ void setup()
   Serial.println(" done.");
 
   //SPI.setClockDivider(4); // hi-speed SPI transfers, needed if playing 88200khz sample rate (88200 currently not working, don't know why)
-  AudioPlayer.selectShutdownPin(SHUTDOWN_PIN); // used to set shutdown pin (SD) on amplifier if desired and set pinmode to output (defaults to pin 7)
+  AudioPlayer.selectShutdownPin(SHUTDOWN_PIN); // used to set shutdown pin (SD) on amplifier if desired and set pinmode to output, if set .play() will 
   AudioPlayer.selectDACPin(DAC_PIN); // used to set audio output pin on Arduino (defaults to pin A0)
+  //AudioPlayer.setBlocking(true); // code execution waits for audio to finish (default is set to false)
   AudioPlayer.begin(sampleRate, NUM_AUDIO_CHANNELS, AUDIO_BUFFER_SIZE); // required inputs: sample rate, number of audio channels possible, size of audio buffer for processing
 
   Serial.print("Playing file: ");
   Serial.println(filename);
-  AudioPlayer.setShutdownPinState(HIGH); // sets SD output pin HIGH, to activate amplifier if desired
   AudioPlayer.play(filename); // plays audio on channel one only
-  delay(10000); // delay may be needed due to non blocking behavior of player, used in combination with setting SD pin low
-  AudioPlayer.setShutdownPinState(LOW); // sets SD output pin LOW, to deactivate amplifier if desired
   
   Serial.println("Send any command to continue...");
 }
@@ -64,62 +62,52 @@ void loop()
 
     if ( c == 'o') 
     {
-      AudioPlayer.setShutdownPinState(HIGH);
       AudioPlayer.play("FX/FX6.wav", 0);
       Serial.println("pouwww! ch1!");
     }
     else if ( c == 'O') 
     {
-      AudioPlayer.setShutdownPinState(HIGH);
       AudioPlayer.play("FX/FX6.wav", 1);
       Serial.println("pouwww! ch2!");
     }
     else if ( c == 's') 
     {
-      AudioPlayer.setShutdownPinState(HIGH);
       AudioPlayer.play("TRACK/HAWKEYE.wav", 2);
       Serial.println("hawkeye ch3!");
     }
     else if ( c == 'S') 
     {
-      AudioPlayer.setShutdownPinState(HIGH);
       AudioPlayer.play("TRACK/HAWKEYE.wav", 3);
       Serial.println("hawkeye ch4!");
     }
     else if ( c == 'd') 
     {
-      AudioPlayer.setShutdownPinState(HIGH);
       AudioPlayer.play("TRACK/COMMANDO.wav", 0);
       Serial.println("commando ch1!");
     }
     else if ( c == 'D') 
     {
-      AudioPlayer.setShutdownPinState(HIGH);
       AudioPlayer.play("TRACK/COMMANDO.wav", 1);
       Serial.println("commando ch2!");
     }
     else if ( c == 'm') 
     {
-      AudioPlayer.setShutdownPinState(HIGH);
       AudioPlayer.play("TRACK/MARIACHI.wav", 2);
       Serial.println("mariachi ch3!");
     }
     else if ( c == 'M') 
     {
-      AudioPlayer.setShutdownPinState(HIGH);
       AudioPlayer.play("TRACK/MARIACHI.wav", 3);
       Serial.println("mariachi ch4!");
     }
     else if ( c == 'l') 
     {
-      AudioPlayer.setShutdownPinState(HIGH);
       AudioPlayer.loopChannel(0, true);
       Serial.println("start looping ch1!");
     }
     else if ( c == 'L') 
     {
       AudioPlayer.loopChannel(0, false);
-      //AudioPlayer.setShutdownPinState(LOW);
       Serial.println("stop looping ch1!");
     }
     else if ( c == 'v') 
@@ -141,26 +129,32 @@ void loop()
     else if ( c == '1') 
     {
       AudioPlayer.stopChannel(1);
-      //AudioPlayer.setShutdownPinState(LOW);
       Serial.println("ch2 off!");
     }
     else if ( c == '2') 
     {
       AudioPlayer.stopChannel(2);
-      //AudioPlayer.setShutdownPinState(LOW);
       Serial.println("ch3 off!");
     }
     else if ( c == '3') 
     {
       AudioPlayer.stopChannel(3);
-      //AudioPlayer.setShutdownPinState(LOW);
       Serial.println("ch4 off!");
     }
     else if ( c == 'X') 
     {
-      AudioPlayer.setShutdownPinState(LOW);
       AudioPlayer.end();
       Serial.println("stop audio player!");
+    }
+    else if ( c == 'Y') 
+    {
+      AudioPlayer.setShutdownPinState(LOW, true); // sets SD output pin LOW, to deactivate amplifier and set mute flag to prevent the SD pin going high during playback
+      Serial.println("mute!");
+    }
+    else if ( c == 'y') 
+    {
+      AudioPlayer.setShutdownPinState(HIGH, false); // sets SD output pin HIGH, to activate amplifier and remove mute flag for the SD pin
+      Serial.println("unmute!");
     }
   }
 }
