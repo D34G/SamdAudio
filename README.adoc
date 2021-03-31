@@ -15,8 +15,11 @@ Compatible with Atmel SAMD series MCU and is best used with DAC related amplifie
         // change the state of the shutdown pin of an amplifier while setting mute flag
         
     void selectDACPin(uint8_t audioOutputPin);
-        // select the audio output pin on the microcontroller
+        // select the audio output pin on the microcontroller4
         
+    void selectDigitalPotPin(uint8_t DigitalPotPin);
+        // select the digital potentiometer pin on the microcontroller
+    
     setBlocking(bool blockFlag);
         // enable or disable blocking mode to prevent code execution play() until audio track finishes, disabled by default
         
@@ -46,6 +49,15 @@ Compatible with Atmel SAMD series MCU and is best used with DAC related amplifie
         
     void gainDown();
         // increase volume (shouldn't need if using hardware gain control)
+        
+    void setVolume(uint8_t v);
+       // move the wiper of the digital potentiometer to the selected value from 0 to 100 (scaled to 0-255)
+    
+    void volumeUp();
+        // decrement the wiper of the digital potentiometer by one
+    
+    void volumeDown();
+        // increment the wiper of the digital potentiometer by one
 
     void end();
         // called to manually stop the audio player
