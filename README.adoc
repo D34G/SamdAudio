@@ -4,6 +4,25 @@ The SamdAudio library enables an Arduino Nano 33 IoT to playback mono 8bit .wav 
 from a storage device like an SD card, without blocking program execution.
 Compatible with Atmel SAMD series MCU and is best used with DAC related amplifiers.
 
+== Features ==
+
+== Updates ==
+----
+Version 1.0.0
+  o Initial Commit, forked from AloyseTech/SamdAudio
+  o modified library for use with PAM8302, should be fine with any Class D amplifier
+  o modified player.ino example for clarity and testing
+  o added blocking flag as an option to increase flexibility of this library
+  o functions added: begin(uint32_t, uint8_t, uint16_t), play(const char *), setBlocking(bool),setVolume(uint8_t) 
+  o functions added: selectShutdownPin(uint8_t), setShutdownPinState(bool), setShutdownPinState(bool, bool), selectDACPin(uint8_t)
+----
+----
+Version 1.1.0
+  o Added MCP4XXX library for hardware volume control through a digital potentiometer
+  o 
+  o functions added: 
+----
+
 == Available Functions ==
     void selectShutdownPin(uint8_t shutdownPin);
         // select the pin to control amplifiers that contain shutdown pins (SD)
