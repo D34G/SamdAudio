@@ -10,15 +10,14 @@
  * published by the Free Software Foundation.
  */
 
-
  //note: so far, only single channel unsigned 8-bit .WAV files have been tested
  //      44100 and 22050 have been successfully tested as sample rates
  //      88200 has NOT been successfully tested
 
- //To Do: add digital potentiometer code for control of amplifier gain
-
 #include "arduino.h"
 #include "SamdAudioSD.h"
+#include <SPI.h>
+#include <mcp4xxx.h>
 
 
 //-----------------------------------Global Variables-----------------------------------
@@ -26,6 +25,7 @@
 #define RAMPIN                 255 // sets size of buffer for ramp divisor
 #define MAX_AUDIO_BUFFER_SIZE  512 // can set to 1024 if there is enough space in dynamic memory but really not recommended because of no successful tests using 1024
 
+MCP4XXX* __audioPot;
 File __audioFile[MAX_N_CHANNELS]; // .wav file to be playedindex from 0 to 3
 volatile bool __audioPlaying[MAX_N_CHANNELS]={false};
 volatile bool __audioLooping[MAX_N_CHANNELS][2]={false}; // 0 index is looping (true) or not looping (false), 1 index is ???playing or not playing??? (never see it set to true so idk it's purpose)
@@ -41,6 +41,7 @@ int __audioBufferSize = 512; // can set to 1024 if there is enough space in dyna
 int __numOfChannelsUsed = 4; // could be 1,2 or 4, number of channels as defined by caller
 uint8_t __shutdownPin = 7;  // can be any pin, used to control a Class D amplifier like the PAM8302
 uint8_t __audioOutputPin = A0; // set to DAC output pin, used to send audio data to an amplifier circuit
+uint8_t __DigitalPotPin = 5; // set to SPI CS pin for a digital potentiometer if using one
 uint8_t __audioPlayerVolume = 4; // 0 to 3, software volume control (shouldn't need if using hardware gain control)
 bool __criticalSection = false; // used in audio read handler
 bool __enableBlocking = false; // prevents code execution at the end of play() until track finishes 
@@ -48,6 +49,7 @@ bool __playingAudio = false; // indicates if audio is playing when blocking is e
 bool __shutdownPinState = LOW; // current state of shutdown pin
 bool __enableShutdown = false;  // indicates that an amplifier shutdown pin is being used
 bool __muteAudio = false; // override to prevent changes to SD pin during playback
+bool __enableDigiPot = false; // indicates use of a digital potentiometer to control hardware gain (volume)
 
 void TC5_Handler (void) __attribute__ ((weak, alias("AudioPlay_Handler")));
 void TC3_Handler (void) __attribute__ ((weak, alias("AudioRead_Handler")));
@@ -452,37 +454,43 @@ void SamdAudioSD::selectShutdownPin(uint8_t shutdownPin) // select the pin to co
 
 void SamdAudioSD::setShutdownPinState(bool pinState) // change the state of the shutdown pin of an amplifier
 {
-  if(pinState == HIGH)
+  if(__enableShutdown)
   {
-    digitalWrite(__shutdownPin, HIGH); // sets the shutdown pin on
-  __shutdownPinState = HIGH;
-  }
-  if(pinState == LOW)
-  {
-    digitalWrite(__shutdownPin, LOW);  // sets the shutdown pin off
-  __shutdownPinState = LOW;
+    if(pinState == HIGH)
+    {
+      digitalWrite(__shutdownPin, HIGH); // sets the shutdown pin on
+      __shutdownPinState = HIGH;
+    }
+    if(pinState == LOW)
+    {
+      digitalWrite(__shutdownPin, LOW);  // sets the shutdown pin off
+      __shutdownPinState = LOW;
+    }
   }
 }
 
 void SamdAudioSD::setShutdownPinState(bool pinState, bool muteAudio) // change the state of the shutdown pin of an amplifier while setting mute flag
 {
-  if(pinState == HIGH)
+  if(__enableShutdown)
   {
-    digitalWrite(__shutdownPin, HIGH); // sets the shutdown pin on
-  __shutdownPinState = HIGH;
-  }
-  if(pinState == LOW)
-  {
-    digitalWrite(__shutdownPin, LOW);  // sets the shutdown pin off
-  __shutdownPinState = LOW;
-  }
-  if(muteAudio)
-  {
-    __muteAudio = true;
-  }
-  else
-  {
-    __muteAudio = false;
+    if(pinState == HIGH)
+    {
+      digitalWrite(__shutdownPin, HIGH); // sets the shutdown pin on
+    __shutdownPinState = HIGH;
+    }
+    if(pinState == LOW)
+    {
+      digitalWrite(__shutdownPin, LOW);  // sets the shutdown pin off
+    __shutdownPinState = LOW;
+    }
+    if(muteAudio)
+    {
+      __muteAudio = true;
+    }
+    else
+    {
+      __muteAudio = false;
+    }
   }
 }
 
@@ -491,9 +499,51 @@ void SamdAudioSD::selectDACPin(uint8_t audioOutputPin) // select the audio outpu
   __audioOutputPin = audioOutputPin; // defaults to DAC pin A0 if not set here
 }
 
-void SamdAudioSD::setBlocking(bool blockFlag) // enable or disable blocking mode to prevent code execution after play() is called until audio track finishes, disabled by default
+void SamdAudioSD::setBlocking(bool blockFlag) // enable or disable blocking mode to prevent code execution play() until audio track finishes, disabled by default
 {
   __enableBlocking = blockFlag; // sets the state of the global blocking flag
+}
+
+void SamdAudioSD::selectDigitalPotPin(uint8_t DigitalPotPin) // select the digital potentiometer pin on the microcontroller
+{
+  __DigitalPotPin = DigitalPotPin;
+  __enableDigiPot = true;
+  __audioPot = new MCP4XXX(__DigitalPotPin);
+  setVolume(0);
+}
+
+void SamdAudioSD::volumeUp() // decrement the wiper of the digital potentiometer by one
+{
+  if(__enableDigiPot)
+  {
+    __audioPot->decrement();
+  }
+}
+
+void SamdAudioSD::volumeDown() // increment the wiper of the digital potentiometer by one
+{
+  if(__enableDigiPot)
+  {
+    __audioPot->increment();
+  }
+}
+
+void SamdAudioSD::setVolume(uint8_t v) // move the wiper of the digital potentiometer to the selected value from 0 to 100 (scaled to 0-255)
+{
+  if(__enableDigiPot)
+  {
+    int potVal = 255;
+    if(v > 100) // fix out of range values
+    {
+      v = 100;
+    }
+    if(v < 0)
+    {
+      v = 0;
+    }
+    potVal = map(v, 0, 100, 255, 0); // mapped for potentiometer
+    __audioPot->set(potVal);
+  }
 }
 
 

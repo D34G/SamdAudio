@@ -13,8 +13,6 @@
  //      44100 and 22050 have been successfully tested as sample rates
  //      88200 has NOT been successfully tested
 
- //To Do: add digital potentiometer code for control of amplifier gain
-
 #ifndef SAMDAUDIOSD_H
 #define SAMDAUDIOSD_H
 
@@ -37,6 +35,9 @@ public:
     void setGain(uint8_t v);
     void gainUp();
     void gainDown();
+    void setVolume(uint8_t v);
+    void volumeUp();
+    void volumeDown();
 
     void end();
 
@@ -47,6 +48,7 @@ public:
     void setShutdownPinState(bool pinState);
     void setShutdownPinState(bool pinState, bool muteAudio);
     void selectDACPin(uint8_t audioOutputPin);
+    void selectDigitalPotPin(uint8_t DigitalPotPin);
 
 private:
   void dacConfigure(void);
