@@ -51,13 +51,13 @@ Compatible with Atmel SAMD series MCU and is best used with DAC related amplifie
         // increase volume (shouldn't need if using hardware gain control)
         
     void setVolume(uint8_t v);
-       // move the wiper of the digital potentiometer to the selected value from 0 to 100 (scaled to 0-255)
+       // move the wiper of the digital potentiometer to the selected value from 0 to 100 (scaled to 0-255) (note, if using other SPI devices all pins will have to be set high first)
     
     void volumeUp();
-        // decrement the wiper of the digital potentiometer by one
+        // decrement the wiper of the digital potentiometer by one (note, if using other SPI devices all pins will have to be set high first)
     
     void volumeDown();
-        // increment the wiper of the digital potentiometer by one
+        // increment the wiper of the digital potentiometer by one (note, if using other SPI devices all pins will have to be set high first)
 
     void end();
         // called to manually stop the audio player
