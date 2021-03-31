@@ -59,11 +59,13 @@ IMO, AudioZero (the library which is reffered to most often for newer Arduino's)
 I found AloyseTech's library and thought this is perfect, almost.  Sdfat (as of Ver 2.0.5) doesn't play well with the Nano 33 IoT, so I changed the SD card driver to SD.h.  I added some good controls for Class D amplifiers that are commonly used.  A few more changes to go and this library will be your go-to for wav file playback! +
 ----
 To-Do:
-  o Add control of digital potentiometer circuits for amps with electronic control of gain
   o Add stereo playback (need help with this one)
   o Add native MP3 decoding
   o take le nap then fire Z MISSILES!
 ----
+
+== Dependencies ==
+MCP4XXX Library https://github.com/D34G/mcp4xxx (control of digital potentiometer circuits for amps with electronic control of gain)
 
 == License ==
 
