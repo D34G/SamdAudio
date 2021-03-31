@@ -68,7 +68,7 @@ In the Player.ino file you will see an example that covers all relevant function
 == Why another library? ==
 IMO, AudioZero (the library which is reffered to most often for newer Arduino's) absolutely sucks.  It's not maintained well and some pretty important bugs have not been addressed in years.
 
-I found AloyseTech's library and thought this is perfect, almost.  Sdfat (as of Ver 2.0.5) doesn't play well with the Nano 33 IoT, so I changed the SD card driver to SD.h.  I added some good controls for Class D amplifiers that are commonly used.  A few more changes to go and this library will be your go-to for wav file playback! +
+I found AloyseTech's library and thought this is perfect, almost.  Sdfat (as of Ver 2.0.5) doesn't play well with the Nano 33 IoT, so I changed the SD card driver to SD.h.  I added some good controls for Class D amplifiers that are commonly used.  I recently added hardware volume control through integration of the MCP4XXX library which controls a digital potentiometer.  A few more changes to go and this library will be your go-to for wav file playback! +
 ----
 To-Do:
   o Add stereo playback (need help with this one)
