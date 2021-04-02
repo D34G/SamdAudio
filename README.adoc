@@ -5,14 +5,14 @@ from a storage device like an SD card, without blocking program execution.
 Compatible with Atmel SAMD series MCU and is best used with DAC related amplifiers.
 
 == Features ==
-Plays Mono channel unsigned 8-bit .WAV files with sample rates of 22050 Hz or 44100 Hz
-Software volume control
-Hardware volume control
-Multi channel audio playback
-Audio playback looping
-Audio mute
-Blocking and non-blocking audio playback
-Audio playback status
+Plays Mono channel unsigned 8-bit .WAV files with sample rates of 22050 Hz or 44100 Hz +
+Software volume control +
+Hardware volume control +
+Multi channel audio playback +
+Audio playback looping +
+Audio mute +
+Blocking and non-blocking audio playback +
+Audio playback status 
 
 == Updates ==
 ----
