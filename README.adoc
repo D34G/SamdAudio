@@ -90,7 +90,7 @@ Version 1.1.0
         // called to manually stop the audio player
 
 == Tutorial ==
-In the Player.ino file you will see an example that covers all relevant functions and procedures related to this library.  If you are not using a Class D amplifier with the Shutdown Pin (SD) then comment out the lines of code related to 'selectShutdownPin(shutdownPin)' and 'setShutdownPinState(pinState)' to avoid unintended behavior.  A video and picture filled, fun fantastic tutorial is coming soon!
+Check out https://github.com/D34G/SamdAudioSD/wiki/SamdAudioSD-Wiki-Page for helpful information to use this library!
 
 == Why another library? ==
 IMO, AudioZero (the library which is reffered to most often for newer Arduino's) absolutely sucks.  It's not maintained well and some pretty important bugs have not been addressed in years.
