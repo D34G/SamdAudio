@@ -6,6 +6,7 @@ Compatible with Atmel SAMD series MCU and is best used with DAC related amplifie
 
 == Features ==
 Plays Mono channel unsigned 8-bit .WAV files with sample rates of 22050 Hz or 44100 Hz +
+Reading audio files from an SD card using SPI +
 Software volume control +
 Hardware volume control +
 Multi channel audio playback +
