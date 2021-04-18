@@ -49,6 +49,7 @@ void setup()
   AudioPlayer.selectDACPin(DAC_PIN); // used to set audio output pin on Arduino (defaults to pin A0)
   AudioPlayer.selectDigitalPotPin(DIGITAL_POT); // used to set the digital potentiometer pin on the arduino in order to control amplifier volume (note, if using other SPI devices all pins will have to be set high first)
   AudioPlayer.setVolume(100); // set the volume anywhere from 0 to 100 (note, if using other SPI devices all pins will have to be set high first)
+  SPI.setClockDivider(12);
   //AudioPlayer.setBlocking(true); // code execution waits for audio to finish (default is set to false)
   AudioPlayer.begin(sampleRate, NUM_AUDIO_CHANNELS, AUDIO_BUFFER_SIZE); // required inputs: sample rate, number of audio channels possible, size of audio buffer for processing
 
