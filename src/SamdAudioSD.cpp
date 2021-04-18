@@ -14,7 +14,7 @@
  //      44100 and 22050 have been successfully tested as sample rates
  //      88200 has NOT been successfully tested
 
-#include "arduino.h"
+#include "Arduino.h"
 #include "SamdAudioSD.h"
 #include <SPI.h>
 #include <mcp4xxx.h>
