@@ -49,7 +49,7 @@ void setup()
   AudioPlayer.selectDACPin(DAC_PIN); // used to set audio output pin on Arduino (defaults to pin A0)
   AudioPlayer.selectDigitalPotPin(DIGITAL_POT); // used to set the digital potentiometer pin on the arduino in order to control amplifier volume (note, if using other SPI devices all pins will have to be set high first)
   AudioPlayer.setVolume(100); // set the volume anywhere from 0 to 100 (note, if using other SPI devices all pins will have to be set high first)
-  SPI.setClockDivider(12);
+  SPI.setClockDivider(12); // brings the SPI clock back to default, needed when using a digital potentiometer due to poor SPI usage in the MCP4XXX library
   //AudioPlayer.setBlocking(true); // code execution waits for audio to finish (default is set to false)
   AudioPlayer.begin(sampleRate, NUM_AUDIO_CHANNELS, AUDIO_BUFFER_SIZE); // required inputs: sample rate, number of audio channels possible, size of audio buffer for processing
 
@@ -108,11 +108,13 @@ void loop()
     else if ( c == 'v') 
     {
       AudioPlayer.volumeUp();   // a hardware control which increases amplifier volume through use of a digital potentiometer like the MCP4151 or MCP 4152 (note, if using other SPI devices all pins will have to be set high first)
+      SPI.setClockDivider(12); // brings the SPI clock back to default, needed when using a digital potentiometer due to poor SPI usage in the MCP4XXX library
       Serial.println("increase volume!");
     }
     else if ( c == 'V') 
     {
       AudioPlayer.volumeDown();  // a hardware control which decreases amplifier volume through use of a digital potentiometer like the MCP4151 or MCP 4152 (note, if using other SPI devices all pins will have to be set high first)
+      SPI.setClockDivider(12); // brings the SPI clock back to default, needed when using a digital potentiometer due to poor SPI usage in the MCP4XXX library
       Serial.println("decrease volume!");
     }
     else if ( c == '0') 
