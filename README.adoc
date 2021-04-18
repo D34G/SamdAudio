@@ -31,6 +31,10 @@ Version 1.1.0
   o modified audio playback to remove the 'pop' when playback starts and stops
   o functions added: setVolume(uint8_t), volumeUp(), volumeDown(), selectDigitalPotPin(uint8_t)
 ----
+----
+Version 1.1.1
+  o Added a fix for SPI clock speed that is needed due to poor SPI handling by the MCP4XXX library
+----
 
 == Tutorial ==
 Check out https://github.com/D34G/SamdAudioSD/wiki/SamdAudioSD-Wiki-Page for helpful information to use this library!
